@@ -1,5 +1,7 @@
 import asyncio
-import os 
+import os
+import random
+import string 
 import dotenv
 import discord 
 from discord.ext import commands 
@@ -15,6 +17,8 @@ class Verification(commands.Cog, app_commands.Group, name = 'verification'):
   
   @app_commands.command(name = 'new', description='Create new Verification')
   async def new_verification(self, interaction: discord.Interaction):
+    verified_roles = interaction.guild.get_role(968855301359018065)
+    code = ''.join(random.choice(string.ascii_uppercase) for i in range(6))
     if interaction.user.get_role(968855301359018065) is not None:
       return await interaction.response.send_message('Kamu sudah terverifikasi!', ephemeral=True)
     
@@ -23,19 +27,22 @@ class Verification(commands.Cog, app_commands.Group, name = 'verification'):
     await interaction.followup.send('Check DM!')
     
   
-    embed = discord.Embed(description=f'⏸ Verifikasi Pending!\n\nKamu akan mendapatkan role @Verified dalam 30 detik.')
+    embed = discord.Embed(description=f'Masukan Code: *{code}*\n\n⏸ Verifikasi Pending!\n\nKamu akan mendapatkan role @Verified')
     embed.set_author(name=interaction.guild.name, icon_url=interaction.guild.icon.url)
-    embed.set_footer(text='Status: Pending')
+    embed.set_footer(text='Status: Pending ( menunggu selama 1 menit )')
     
     msg = await interaction.user.send(embed=embed)
     
-    await asyncio.sleep(30)
-    
-    await interaction.user.add_roles(interaction.guild.get_role(968855301359018065))
-    embed = discord.Embed(description=f'✅ Verifikasi Berhasil!\n\nKamu sudah mendapatkan role @Verified')
-    embed.set_footer(text='Status: Verified')
-    await msg.edit(embed=embed)
-
+    try:
+      msg2 = await interaction.client.wait_for('message', timeout=60, check=lambda m: m.author == interaction.user and m.content == code)
+      embed.set_footer(text='Status: Verified✅')
+      embed.description = f'Code: *{code}*\n\n😁 Verifikasi Berhasil!\n\nKamu telah mendapatkan role @Verified\n'
+      await interaction.user.add_roles(verified_roles)
+      await msg.edit(embed=embed) 
+    except asyncio.TimeoutError:
+      embed.set_footer(text='Status: Failed ( kelamaan )')
+      await msg.edit(embed=embed)
+      
     
     
     
