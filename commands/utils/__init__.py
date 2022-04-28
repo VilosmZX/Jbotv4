@@ -1,0 +1,1 @@
+from .timestamp import generate_time

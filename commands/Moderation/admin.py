@@ -5,6 +5,7 @@ import dotenv
 import discord 
 from discord.ext import commands 
 from discord import app_commands
+from commands.utils import generate_time
 
 dotenv.load_dotenv()
 
@@ -70,6 +71,7 @@ class Admin(commands.Cog):
   @app_commands.checks.has_permissions(ban_members=True)
   async def clearbans(self, interaction: discord.Interaction, reason: Optional[str] = None):
     embed = discord.Embed()
+    timestamp = generate_time()
     embed.description = f'Tidak ada user yang terkena ban'
     embed.set_footer(text=f'hari ini jam {datetime.now().strftime("%H:%M")}')
     if len([user async for user in interaction.guild.bans()]) == 0:
@@ -80,7 +82,7 @@ class Admin(commands.Cog):
       await interaction.guild.unban(entry.user, reason=reason)
     embed = discord.Embed()
     embed.description = f'{total_user} user berhasil di unban!'
-    embed.set_footer(text=f'hari ini jam {datetime.now().strftime("%H:%M")}')
+    embed.set_footer(text=f'hari ini jam {timestamp}')
     await interaction.response.send_message(embed=embed, ephemeral=True)
       
       
