@@ -5,6 +5,7 @@ from handler import load_all
 from discord.ext import commands 
 import dotenv
 import motor.motor_asyncio as motor
+from website import run
 
 dotenv.load_dotenv()
 
@@ -34,6 +35,7 @@ async def main():
   bot.db = bot.mongo['jbot']
   bot.collection = bot.db['economy']
   await bot.start(os.environ.get('TOKEN'))
+  
 
 asyncio.run(main())
     

@@ -1,0 +1,13 @@
+{% extends 'index.html' %} {% block content %}
+
+<div class="card mx-auto mt-5" style="width: 18rem">
+  <p class="font-monospace mx-auto">Guilds this bot connected to  </p>
+  <ul class="list-group list-group-flush gap-3">
+    {% for guild in bot.guilds %}
+      <li class="list-group-item font-monospace">
+        <a href="/guild/{{guild.id}}" class="link-info">{{guild.name}}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

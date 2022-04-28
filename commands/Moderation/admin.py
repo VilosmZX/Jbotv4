@@ -84,10 +84,13 @@ class Admin(commands.Cog):
     embed.description = f'{total_user} user berhasil di unban!'
     embed.set_footer(text=f'hari ini jam {timestamp}')
     await interaction.response.send_message(embed=embed, ephemeral=True)
-      
+    
+    
+  
       
   @kick.error 
   @ban.error
+  @clearbans.error
   async def on_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.MissingPermissions):
       return await interaction.response.send_message('Tidak ada akses.', ephemeral=True)

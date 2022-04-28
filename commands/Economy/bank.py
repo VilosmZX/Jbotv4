@@ -6,6 +6,7 @@ import discord
 from discord.ext import commands 
 from discord import app_commands
 from .utils import check_user
+from commands.utils import generate_time
 
 dotenv.load_dotenv()
 
@@ -83,8 +84,30 @@ class Economy(commands.Cog, app_commands.Group, name='bank'):
   
   
   @app_commands.command(name='transfer', description='Transfer uang ke bank orang lain')
-  async def transfer(self, interaction: discord.Interaction, money: int):
-    pass 
+  @app_commands.describe(user = 'User yang ingin kamu transfer', money = 'Jumlah Uang yang ingin kamu transfer')
+  async def transfer(self, interaction: discord.Interaction, user: discord.Member, money: int):
+    embed = discord.Embed()
+    await check_user(self.bot, interaction.user.id)
+    await check_user(self.bot, user.id)
+    minimum_money = 50000
+    your_data = await self.bot.collection.find_one({'_id': interaction.user.id})
+    user_data = await self.bot.collection.find_one({'_id': user.id})
+    if money < minimum_money:
+      embed.description = f'Jumlah Minimum 💰 {money}'
+      return await interaction.response.send_message(embed=embed, ephemeral=True)
+    if money > your_data['bank']:
+      embed.description = f'Uang di bank kurang dari 💰 {money}'
+      return await interaction.response.send_message(embed=embed, ephemeral=True)
+    embed.description = f'✅ Transfer berhasil!\n\nDari: {interaction.user.mention}\nKepada: {user.mention}\nJumlah: Rp.{money}\n'
+    user_data['bank'] += money 
+    your_data['bank'] -= money 
+    embed.description += f'Sisa: Rp.{your_data["bank"]}\n''\n'
+    embed.set_author(name=user, icon_url=user.display_avatar.url)
+    timestamp = generate_time()
+    embed.set_footer(text=f'Hari ini, jam {timestamp}')
+    await interaction.response.send_message(embed=embed)
+    
+    
   
   
 

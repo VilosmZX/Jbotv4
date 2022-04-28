@@ -16,6 +16,8 @@ dotenv.load_dotenv()
 class Fun(commands.Cog):
   def __init__(self, bot: commands.Bot):
     self.bot = bot 
+    self.assets = os.path.join(os.getcwd(), 'commands', 'Fun', 'assets')
+    self.fonts = os.path.join(os.getcwd(), 'fonts')
     
     
   @app_commands.command(name='wanted', description='Membuat gambar wanted user')
@@ -87,7 +89,42 @@ class Fun(commands.Cog):
     harem_img.paste(pfp, (820, 84))
     harem_img.save(os.path.join(os.getcwd(), 'commands', 'Fun', 'saved', f'harem_{interaction.user.id}.jpg'))
     await interaction.edit_original_message(attachments=[discord.File(os.path.join(os.getcwd(), 'commands', 'Fun', 'saved', f'harem_{interaction.user.id}.jpg'))])
-    
+
+  @app_commands.command(name='marry', description='nikahkan dua orang dengan template muka jes dan derren omg!!!')
+  async def marry(self, interaction: discord.Interaction, first_user: discord.Member, second_user: discord.Member):
+    await interaction.response.defer()
+    msg = await interaction.followup.send('tunggu sebentar.')
+    jesder_img = Image.open(self.assets + '/derjes.jpeg')
+    first_user_pfp = Image.open(BytesIO(await first_user.display_avatar.with_size(128).read())).resize((112, 113), Image.ANTIALIAS)
+    second_user_pfp = Image.open(BytesIO(await second_user.display_avatar.with_size(128).read())).resize((125, 112), Image.ANTIALIAS)
+    draw = ImageDraw.Draw(jesder_img)
+    font = ImageFont.truetype(self.fonts + '/nunito/static/Nunito-Black.ttf', 30)
+    draw.text((56, 346), f'@{str(first_user)}', (0, 0, 0), font)
+    draw.text((480, 413), f'@{str(second_user)}', (0, 0, 0), font)
+    jesder_img.paste(first_user_pfp, (34, 188))
+    jesder_img.paste(second_user_pfp, (514, 213))
+    with BytesIO() as a:
+      jesder_img.save(a, 'PNG')
+      a.seek(0)
+      await interaction.edit_original_message(content=f'Omg selamat {first_user.mention} dan {second_user.mention} karena sudah menikah semoga cepet punya anak OMG!!!', attachments=[discord.File(a, f'{first_user}_{second_user}.png')])
+      
+  @app_commands.command(name='wut', description='Wut???')
+  async def wut(self, interaction: discord.Interaction, user: Optional[discord.Member] = None):
+    if user is None:
+      user = interaction.user 
+    await interaction.response.defer()
+    msg = await interaction.followup.send('tunggu sebentar.')
+    wut_img = Image.open(self.assets + '/what.png').convert('RGBA')
+    wut_img = wut_img.resize((round(wut_img.size[0] * 0.5), round(wut_img.size[1] * 0.5)))
+    pfp = Image.open(BytesIO(await user.display_avatar.with_size(128).read())).convert('RGBA')
+    pfp = pfp.resize((round(429 * 0.5), round(382 * 0.5)))
+    wut_img.paste(pfp, (round(425 * 0.5), round(219 * 0.5)))
+    with BytesIO() as a:
+      wut_img.save(a, 'PNG')
+      a.seek(0)
+      await interaction.edit_original_message(content=f'', attachments=[discord.File(a, f'wut.png')]) 
+  
+  
   
     
 async def setup(bot: commands.Bot):
