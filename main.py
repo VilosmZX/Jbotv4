@@ -18,6 +18,7 @@ class Bot(commands.Bot):
     
   async def setup_hook(self) -> None:
       await load_all(bot)
+      # Remove this to set The command globally
       await bot.tree.sync(guild=discord.Object(id=int(os.environ.get('GUID'))))
       
   async def close(self) -> None:
