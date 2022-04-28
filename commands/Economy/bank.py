@@ -1,5 +1,6 @@
 from typing import Optional, Union
-import os 
+import os
+from urllib import response 
 import dotenv
 import discord 
 from discord.ext import commands 
@@ -45,6 +46,7 @@ class Economy(commands.Cog, app_commands.Group, name='bank'):
   
   @app_commands.command(name = 'view', description='Melihat rekening dan uang mu')
   async def view(self, interaction: discord.Interaction):
+    self.embed.clear_fields()
     await check_user(self.bot, interaction.user.id)
     user_data = await self.bot.collection.find_one({'_id': interaction.user.id})
     await interaction.response.defer()
@@ -54,6 +56,39 @@ class Economy(commands.Cog, app_commands.Group, name='bank'):
     self.embed.add_field(name='💰 Uang', value=user_data['money'], inline=False)
     self.embed.add_field(name='🏦 Bank', value=user_data['bank'], inline=False)
     await interaction.followup.send(embed=self.embed)
+    
+  @app_commands.command(name='withdraw', description='Ambil uang dari bank')
+  async def withdraw(self, interaction: discord.Interaction, money: Optional[int] = None):
+    embed = discord.Embed()
+    await check_user(self.bot, interaction.user.id)
+    user_data = await self.bot.collection.find_one({'_id': interaction.user.id})
+    if money is None:
+      embed.description = f'Berhasil Mengambil uang sebanyak {user_data["bank"]} dari bank'
+      user_data['money'] += user_data['bank']
+      user_data['bank'] = 0
+      embed.color = discord.Color.green()
+      await self.bot.collection.replace_one({'_id': interaction.user.id}, user_data)
+      return await interaction.response.send_message(embed=embed)
+    
+    if money <= 0:
+      return await interaction.response.send_message(f'Nomor tidak valid', ephemeral=True)
+    if money > user_data['bank']:
+      return await interaction.response.send_message(f'Uang kamu di ban kurang dari {money} rupiah.', ephemeral=True)
+    user_data['money'] += money 
+    user_data['bank'] -= money 
+    embed.description = f'Berhasil Mengambil uang sebanyak {money} dari bank'
+    embed.color = discord.Color.blue()
+    await self.bot.collection.replace_one({'_id': interaction.user.id}, user_data)
+    return await interaction.response.send_message(embed=embed)
+  
+  
+  @app_commands.command(name='transfer', description='Transfer uang ke bank orang lain')
+  async def transfer(self, interaction: discord.Interaction, money: int):
+    pass 
+  
+  
+
+
     
      
     
