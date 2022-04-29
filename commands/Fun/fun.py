@@ -9,7 +9,7 @@ from discord.ext import commands
 from PIL import Image, ImageFont, ImageDraw, ImageChops
 from discord import app_commands 
 from commands.utils import generate_time
-
+import aiohttp
 
 dotenv.load_dotenv()
 
@@ -157,6 +157,34 @@ class Fun(commands.Cog):
       a.seek(0)
       await interaction.edit_original_message(content='Selesai.', attachments=[discord.File(a, 'a.png')])
 
+
+  @app_commands.command(name = 'quotes', description='Jika kamu sedih dan putus asa silahkan jalankan command ini')
+  @app_commands.choices(
+    option = [
+      app_commands.Choice(name = 'random', value=1),
+      app_commands.Choice(name='popular', value=2),
+      app_commands.Choice(name='teknologi', value=2),
+      app_commands.Choice(name='sejarah', value=2),
+    ]
+  )
+  async def quotes(self, interaction: discord.Interaction, option: int):
+    url = 'https://api.quotable.io'
+    embed = discord.Embed(color=discord.Color.random())
+    async with aiohttp.ClientSession() as session:
+      endpoint = None 
+      if option == 1:
+        endpoint = url + '/random'
+      elif option == 2:
+        endpoint = url + '/random?tags=famous-quotes'
+      elif option == 3:
+        endpoint = url + '/random?tags=technology'
+      elif option == 4:
+        endpoint = url + '/random?tags=history'
+      async with await session.get(endpoint) as response:
+        data = await response.json()
+        embed.description = f'***{data["content"]}***'
+        embed.set_footer(text=f'Quote by {data["author"]}')
+        await interaction.response.send_message(embed=embed)
 
 
 
