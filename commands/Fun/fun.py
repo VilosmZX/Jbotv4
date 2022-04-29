@@ -10,6 +10,7 @@ from PIL import Image, ImageFont, ImageDraw, ImageChops
 from discord import app_commands 
 from commands.utils import generate_time
 import aiohttp
+from googletrans import Translator
 
 dotenv.load_dotenv()
 
@@ -18,6 +19,7 @@ class Fun(commands.Cog):
     self.bot = bot 
     self.assets = os.path.join(os.getcwd(), 'commands', 'Fun', 'assets')
     self.fonts = os.path.join(os.getcwd(), 'fonts')
+    self.translator = Translator()
     
     
   @app_commands.command(name='wanted', description='Membuat gambar wanted user')
@@ -182,9 +184,11 @@ class Fun(commands.Cog):
         endpoint = url + '/random?tags=history'
       async with await session.get(endpoint) as response:
         data = await response.json()
-        embed.description = f'***{data["content"]}***'
+        text = self.translator.translate(data['content'], src='en', dest='id')
+        embed.description = f'***{text.text}***'
         embed.set_footer(text=f'Quote by {data["author"]}')
         await interaction.response.send_message(embed=embed)
+        
 
 
 
