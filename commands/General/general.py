@@ -33,6 +33,11 @@ class General(commands.Cog):
     embed.description = f'{interaction.user.mention} bukan seorang admin!'
     return await interaction.response.send_message(embed=embed)
 
+  @app_commands.command(name = 'nickname', description='Mengubah nama mu')
+  async def change_nickname(self, interaction: discord.Interaction, username: str):
+    embed = discord.Embed(description=f'Mengubah nama dari {interaction.user.display_name} -> {username}')
+    await interaction.user.edit(nick=username)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
 
