@@ -2,6 +2,7 @@ from io import BytesIO
 import os
 import random
 from re import A
+import string
 from typing import Optional 
 import dotenv
 import discord 
@@ -188,6 +189,69 @@ class Fun(commands.Cog):
         embed.description = f'***{text.text}***'
         embed.set_footer(text=f'Quote by {data["author"]}')
         await interaction.response.send_message(embed=embed)
+        
+  @app_commands.command(name = 'animal', description='Idk random bet soalnya')
+  @app_commands.choices(
+    option = [
+        app_commands.Choice(name = 'dog', value=1),
+        app_commands.Choice(name = 'cat', value=2),
+    ]
+  )
+  async def animal(self, interaction: discord.Interaction, option: int):
+    await interaction.response.send_message('Mengambil data...')
+    url = 'https://random-stuff-api.p.rapidapi.com/animals/'
+    headers = {
+      'Authorization': 'Iif8PB48eRoT',
+      'X-RapidAPI-Host': 'random-stuff-api.p.rapidapi.com',
+      'X-RapidAPI-Key': '8259075b20msh8ff5c35111a7496p1e5967jsn537bb2a3bc16'
+    }
+    async with aiohttp.ClientSession(headers=headers) as session:
+      category = None 
+      if option == 1:
+        category = 'DOG'
+      elif option == 2:
+        category = 'CAT'
+      async with await session.get(url + category, params={'limit': 1}) as response:
+        data = await response.json()
+        async with await session.get(data[0]['url']) as image:
+          image = BytesIO(await image.read())
+          await interaction.edit_original_message(content='Selesai.', attachments=[discord.File(image, f'{category}.png')])
+          
+          
+  @app_commands.command(name = 'weather', description='Mendapatkan informasi cuacah')
+  @app_commands.describe(query = 'Nama kota atau negara atau provinsi')
+  async def weather(self, interaction: discord.Interaction, query: str):
+    params = {
+      'q': query.strip().replace(',', ''),
+      'lang': 'id'
+    }
+    
+    headers = {
+      'X-RapidAPI-Host': 'community-open-weather-map.p.rapidapi.com',
+      'X-RapidAPI-Key': '8259075b20msh8ff5c35111a7496p1e5967jsn537bb2a3bc16'
+    }
+    await interaction.response.send_message('Mengambil data...')
+    async with aiohttp.ClientSession(headers=headers) as session:
+      url = 'https://community-open-weather-map.p.rapidapi.com/weather'
+      async with await session.get(url, params=params) as response:
+        data = await response.json()
+        embed = discord.Embed(color=discord.Color.random())
+        emoji = None 
+        if data['weather'][0]['main'] == 'Clouds':
+          emoji = '☁'
+        elif data['weather'][0]['main'] == 'Rain':
+          emoji = '🌧'
+        elif data['weather'][0]['main'] == 'Wind':
+          emoji = '🌫'
+        elif data['weather'][0]['main'] == 'Snowy':
+          emoji = '🌨'
+        elif data['weather'][0]['main'] == 'Sunlight':
+          emoji = '⛅'
+        
+        embed.description = f'{emoji} {str(data["weather"][0]["description"]).upper()}'
+        embed.set_footer(text=f'Di {data["name"]}')
+        await interaction.edit_original_message(embed=embed)
+        
         
 
 
