@@ -17,9 +17,12 @@ class Lock(commands.Cog, app_commands.Group, name = 'lock'):
   @app_commands.command(name='textchannel', description='Lock Text Channel')
   @app_commands.checks.has_permissions(manage_channels=True)
   async def textchannel(self, interaction: discord.Interaction, channel: Optional[discord.TextChannel] = None):
+    everyone_role = interaction.guild.get_role(756105841429708830)
     if channel is None:
       channel = interaction.channel
-    everyone_role = interaction.guild.get_role(756105841429708830)
+    if not channel.permissions_for(everyone_role).send_messages:
+      await channel.set_permissions(everyone_role, send_messages=True)
+      return await interaction.response.send_message(f'🔓 Channel {channel.mention} berhasil di buka.')
     await channel.set_permissions(everyone_role, send_messages=False)
     return await interaction.response.send_message(f'🔒 Channel {channel.mention} berhasil di lock.')
   
