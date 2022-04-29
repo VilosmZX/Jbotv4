@@ -85,6 +85,40 @@ class Admin(commands.Cog):
     embed.set_footer(text=f'hari ini jam {timestamp}')
     await interaction.response.send_message(embed=embed, ephemeral=True)
     
+  @app_commands.command(name = 'lockdown', description='Lockdown semua channel')
+  @app_commands.choices(
+    option = [
+      app_commands.Choice(name = 'on', value=1),
+      app_commands.Choice(name = 'off', value=2)
+    ]
+  )
+  @app_commands.checks.has_permissions(manage_channels=True)
+  async def lockdown(self, interaction: discord.Interaction, option: int):
+    await interaction.response.defer()
+    everyone_role = interaction.guild.get_role(756105841429708830)
+    total_text_channel = 0
+    total_voice_channel = 0
+    status = None 
+    for channel in await interaction.guild.fetch_channels():
+      c: discord.abc.GuildChannel = channel
+      perm = None 
+      if option == 1:
+        perm = False 
+        status = 'lock'
+      else:
+        perm = True 
+        status = 'unlock'
+      if c.type == discord.ChannelType.text:
+        await c.set_permissions(everyone_role, send_messages=perm)
+        total_text_channel += 1
+      elif c.type == discord.ChannelType.voice:
+        await c.set_permissions(everyone_role, connect=perm)
+        total_voice_channel += 1
+    embed = discord.Embed(title='⚠ Lockdown')
+    embed.description = f'\n{total_text_channel} text channel di {status} 🔒\n{total_voice_channel} voice channel di {status} 🔒'
+    await interaction.followup.send(embed=embed)
+      
+    
     
   
       
