@@ -4,3 +4,4 @@ __pycache__
 .env
 *.iml
 *.xml
+.idea/*
