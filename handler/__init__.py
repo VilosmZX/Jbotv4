@@ -1,1 +1,1 @@
-from .command_handler import load_all
+from .command_handler import load_all, reload_all
