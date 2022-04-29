@@ -1,8 +1,10 @@
 import os
+import sys
 import dotenv
 import discord 
 from discord.ext import commands 
 from discord import app_commands
+from handler import reload_all
 
 dotenv.load_dotenv()
 
@@ -16,6 +18,24 @@ class Owner(commands.Cog):
   async def echo(self, interaction: discord.Interaction, message: str):
     await interaction.response.send_message('Mengirim Pesan...', ephemeral=True)
     await interaction.channel.send(message)
+    
+    
+  @app_commands.command(name='reload')
+  @app_commands.choices(option = [
+    app_commands.Choice(name = 'commands', value=1)
+  ])
+  @app_commands.checks.has_role('DEV')
+  async def reload(self, interaction: discord.Interaction, option: int):
+    if option == 1:
+      await reload_all(self.bot)
+      await interaction.response.send_message(f'Semua command berhasil di reload!', ephemeral=True)
+      
+  @app_commands.command(name = 'shutdown')
+  @app_commands.checks.has_role('DEV')
+  async def shutdown(self, interaction: discord.Interaction):
+    await interaction.response.send_message('Bot telah di shutdown', ephemeral=True)
+    await self.bot.close()
+    sys.exit(1)
     
     
   @echo.error 
