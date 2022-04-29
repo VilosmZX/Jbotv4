@@ -6,7 +6,7 @@ from typing import Optional
 import dotenv
 import discord 
 from discord.ext import commands 
-from PIL import Image, ImageFont, ImageDraw 
+from PIL import Image, ImageFont, ImageDraw, ImageChops
 from discord import app_commands 
 from commands.utils import generate_time
 
@@ -122,7 +122,41 @@ class Fun(commands.Cog):
     with BytesIO() as a:
       wut_img.save(a, 'PNG')
       a.seek(0)
-      await interaction.edit_original_message(content=f'', attachments=[discord.File(a, f'wut.png')]) 
+      await interaction.edit_original_message(content=f'', attachments=[discord.File(a, f'wut.png')])
+
+  def circle(self, pfp: Image.Image, size: tuple):
+    pfp = pfp.resize(size, Image.ANTIALIAS)
+    mask = Image.new('L', pfp.size, 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0) + pfp.size, fill=255)
+    mask = mask.resize(pfp.size, Image.ANTIALIAS)
+    mask = ImageChops.darker(mask, pfp.split()[-1])
+    pfp.putalpha(mask)
+    return pfp
+
+  @app_commands.command(name = 'berlyn', description='Berlyn love gishel')
+  async def berlyn(self, interaction: discord.Interaction, user: Optional[discord.Member] = None, pesan: Optional[str] = 'Berlyn sangat cinta gishel'):
+    await interaction.response.send_message('tunggu sebentar')
+    if user is None:
+      user = interaction.user
+    berlyn_img = Image.open(self.assets + '/berlyn.png').convert('RGBA')
+    pfp = Image.open(BytesIO(await user.display_avatar.with_size(128).read())).convert('RGBA')
+    pfp = self.circle(pfp, (306, 422))
+    berlyn_img.paste(pfp, (104, 242),pfp)
+    font = ImageFont.truetype(self.fonts + '/nunito/static/Nunito-Regular.ttf', 35)
+    subfont = ImageFont.truetype(self.fonts + '/nunito/static/Nunito-Light.ttf', 20)
+    draw = ImageDraw.Draw(berlyn_img)
+    draw.text((25, 820), str(user), font=font, fill=(0, 0, 0))
+    draw.text((25, 860), str(pesan), font=subfont, fill=(0, 0, 0))
+    with BytesIO() as a:
+      berlyn_img.save(a, 'PNG')
+      a.seek(0)
+      await interaction.edit_original_message(content='Selesai.', attachments=[discord.File(a, 'a.png')])
+
+
+
+
+
   
   
   
