@@ -100,7 +100,9 @@ class Economy(commands.Cog, app_commands.Group, name='bank'):
       return await interaction.response.send_message(embed=embed, ephemeral=True)
     embed.description = f'✅ Transfer berhasil!\n\nDari: {interaction.user.mention}\nKepada: {user.mention}\nJumlah: Rp.{money}\n'
     user_data['bank'] += money 
-    your_data['bank'] -= money 
+    your_data['bank'] -= money
+    await self.bot.collection.replace_one({'_id': user.id}, user_data)
+    await self.bot.collection.replace_one({'_id': interaction.user.id}, your_data)
     embed.description += f'Sisa: Rp.{your_data["bank"]}\n''\n'
     embed.set_author(name=user, icon_url=user.display_avatar.url)
     timestamp = generate_time()
