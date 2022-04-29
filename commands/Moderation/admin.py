@@ -132,24 +132,21 @@ class Admin(commands.Cog):
   @app_commands.checks.has_permissions(manage_nicknames=True)
   @app_commands.describe(user = 'User yang ingin diganti nama nya', nickname = 'Nama user yang baru')
   async def setnickname(self, interaction: discord.Interaction, user: discord.Member, nickname: str):
-    embed = discord.Embed(description=f'Mengubah nama dari {interaction.user.display_name} -> {nickname}')
+    embed = discord.Embed(description=f'Mengubah nama dari {user.display_name} -> {nickname}')
     await user.edit(nick=nickname)
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
-  @app_commands.command(name = 'move', description='Memindahkan user ke channel lain')
-  @app_commands.checks.has_permissions(manage_nicknames=True)
-  @app_commands.describe(user='User yang ingin dipindahkan', channel='Nama user yang ingin dipindahkan')
-  async def move(self, interaction: discord.Interaction, user: discord.Member, channel: discord.TextChannel):
-    embed = discord.Embed(description=f'Memindahkan user dari {interaction.channel.mention} -> {channel.mention}')
-    await user.move_to(channel=channel)
+  @app_commands.command(name = 'moveto', description='Memindahkan user ke channel lain')
+  @app_commands.checks.has_permissions(ban_members=True)
+  @app_commands.describe(user='User yang ingin dipindahkan', voice_channel='Nama user yang ingin dipindahkan')
+  async def moveto(self, interaction: discord.Interaction, user: discord.Member, voice_channel: discord.VoiceChannel):
+    embed = discord.Embed(description=f'Memindahkan user dari {user.voice.channel.mention} -> {voice_channel.mention}')
+    if not user.voice:
+      embed.description = f'❌ User tidak dalam voice channel'
+      return await interaction.response.send_message(embed=embed)
+    await user.move_to(channel=voice_channel)
     await interaction.response.send_message(embed=embed)
 
-
-
-      
-    
-    
-  
       
   @kick.error 
   @ban.error
