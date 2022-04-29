@@ -46,6 +46,7 @@ class Economy(commands.Cog):
     user_data['money'] += money_received
     await self.bot.collection.replace_one({'_id': interaction.user.id}, user_data)
     await interaction.response.send_message(embed=embed)
+
   
     
   
