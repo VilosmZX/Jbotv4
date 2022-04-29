@@ -117,6 +117,17 @@ class Admin(commands.Cog):
     embed = discord.Embed(title='⚠ Lockdown')
     embed.description = f'\n{total_text_channel} text channel di {status} 🔒\n{total_voice_channel} voice channel di {status} 🔒'
     await interaction.followup.send(embed=embed)
+
+
+  @app_commands.command(name = 'clear', description='Clear semua message dari channel')
+  @app_commands.checks.has_permissions(manage_messages=True)
+  @app_commands.describe(channel = 'nama channel yang ingin clear message nya')
+  async def clear(self, interaction: discord.Interaction, channel: Optional[discord.TextChannel] = None):
+    if channel is None:
+      channel: discord.TextChannel = interaction.channel
+    await channel.delete()
+    await interaction.response.send_message(f'semua pesna berhasil dihapus', ephemeral=True)
+
       
     
     
