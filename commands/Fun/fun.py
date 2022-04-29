@@ -28,7 +28,7 @@ class Fun(commands.Cog):
       user_profile = user.display_avatar.with_size(128)
     
     await interaction.response.send_message('tunggu sebentar...')
-    wanted_img = Image.open(os.path.join(os.getcwd(), 'commands', 'Fun', 'assets', 'wanted.jpg'), Image.ANTIALIAS)
+    wanted_img = Image.open(os.path.join(os.getcwd(), 'commands', 'Fun', 'assets', 'wanted.jpg'))
     font = ImageFont.truetype('fonts/ibm/IBMPlexSans-Bold.ttf', 24)
     draw = ImageDraw.Draw(wanted_img)
     if price is not None:
@@ -38,13 +38,13 @@ class Fun(commands.Cog):
       
     draw.text((60, 613), text, (0, 0, 0), font)
     data = BytesIO(await user_profile.read())
-    pfp = Image.open(data, Image.ANTIALIAS)
+    pfp = Image.open(data)
     pfp = pfp.resize((376, 376))
     wanted_img.paste(pfp, (55, 192))
     with BytesIO() as a:
       wanted_img.save(a, 'PNG')
       a.seek(0)
-      await interaction.edit_original_message(content='', attachments=[discord.File(a, f'wanted_{user.name}.png')])
+      await interaction.edit_original_message(content='', attachments=[discord.File(a, f'wanted_image.png')])
     
   @app_commands.command(name='trigger', description='Trigger user with image')
   async def trigger(self, interaction: discord.Interaction, user: Optional[discord.Member] = None):
