@@ -84,7 +84,7 @@ class Economy(commands.Cog, app_commands.Group, name='bank'):
   
   
   @app_commands.command(name='transfer', description='Transfer uang ke bank orang lain')
-  @app_commands.describe(user = 'User yang ingin kamu transfer', money = 'Jumlah Uang yang ingin kamu transfer')
+  @app_commands.describe(user = 'User yang ingin kamu transfer dari bank', money = 'Jumlah Uang yang ingin kamu transfer')
   async def transfer(self, interaction: discord.Interaction, user: discord.Member, money: int):
     embed = discord.Embed()
     await check_user(self.bot, interaction.user.id)
