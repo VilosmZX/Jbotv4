@@ -28,7 +28,7 @@ class Fun(commands.Cog):
       user_profile = user.display_avatar.with_size(128)
     
     await interaction.response.send_message('tunggu sebentar...')
-    wanted_img = Image.open(os.path.join(os.getcwd(), 'commands', 'Fun', 'assets', 'wanted.jpg')) 
+    wanted_img = Image.open(os.path.join(os.getcwd(), 'commands', 'Fun', 'assets', 'wanted.jpg'), Image.ANTIALIAS)
     font = ImageFont.truetype('fonts/ibm/IBMPlexSans-Bold.ttf', 24)
     draw = ImageDraw.Draw(wanted_img)
     if price is not None:
@@ -38,12 +38,13 @@ class Fun(commands.Cog):
       
     draw.text((60, 613), text, (0, 0, 0), font)
     data = BytesIO(await user_profile.read())
-    pfp = Image.open(data)
+    pfp = Image.open(data, Image.ANTIALIAS)
     pfp = pfp.resize((376, 376))
     wanted_img.paste(pfp, (55, 192))
-    wanted_img.save(os.path.join(os.getcwd(), 'commands', 'Fun', 'saved', f'wanted_{interaction.user.id}.jpg'))
-    await interaction.edit_original_message(attachments=[discord.File(os.path.join(os.getcwd(), 'commands', 'Fun', 'saved', f'wanted_{interaction.user.id}.jpg'))])
-    
+    with BytesIO() as a:
+      wanted_img.save(a, 'PNG')
+      a.seek(0)
+      await interaction.edit_original_message(content='', attachments=[discord.File(a, f'wanted_{user.name}.png')])
     
   @app_commands.command(name='trigger', description='Trigger user with image')
   async def trigger(self, interaction: discord.Interaction, user: Optional[discord.Member] = None):
@@ -56,9 +57,10 @@ class Fun(commands.Cog):
     pfp = Image.open(BytesIO(await user_profile.read()))
     pfp = pfp.resize((96, 73))
     trigger_img.paste(pfp, (76, 78))
-    trigger_img.save(os.path.join(os.getcwd(), 'commands', 'Fun', 'saved', f'triggered_{interaction.user.id}.jpg'))
-    await interaction.edit_original_message(attachments=[discord.File(os.path.join(os.getcwd(), 'commands', 'Fun', 'saved', f'triggered_{interaction.user.id}.jpg'))])
-
+    with BytesIO() as a:
+      trigger_img.save(a, 'PNG')
+      a.seek(0)
+      await interaction.edit_original_message(content='', attachments=[discord.File(a, f'triggered{user.name}.png')])
   
 
   @app_commands.command(name='gay', description='Mengukur tingkat gay seseorang')
@@ -87,8 +89,10 @@ class Fun(commands.Cog):
     pfp = pfp.resize((110, 115))
     pfp = pfp.rotate(-45)
     harem_img.paste(pfp, (820, 84))
-    harem_img.save(os.path.join(os.getcwd(), 'commands', 'Fun', 'saved', f'harem_{interaction.user.id}.jpg'))
-    await interaction.edit_original_message(attachments=[discord.File(os.path.join(os.getcwd(), 'commands', 'Fun', 'saved', f'harem_{interaction.user.id}.jpg'))])
+    with BytesIO() as a:
+      harem_img.save(a, 'PNG')
+      a.seek(0)
+      await interaction.edit_original_message(content='', attachments=[discord.File(a, f'harem{user.name}.png')])
 
   @app_commands.command(name='marry', description='nikahkan dua orang dengan template muka jes dan derren omg!!!')
   async def marry(self, interaction: discord.Interaction, first_user: discord.Member, second_user: discord.Member):
