@@ -128,6 +128,24 @@ class Admin(commands.Cog):
     await channel.delete()
     await interaction.response.send_message(f'semua pesna berhasil dihapus', ephemeral=True)
 
+  @app_commands.command(name = 'setnickname', description='Mengubah nickname dari user')
+  @app_commands.checks.has_permissions(manage_nicknames=True)
+  @app_commands.describe(user = 'User yang ingin diganti nama nya', nickname = 'Nama user yang baru')
+  async def setnickname(self, interaction: discord.Interaction, user: discord.Member, nickname: str):
+    embed = discord.Embed(description=f'Mengubah nama dari {interaction.user.display_name} -> {nickname}')
+    await user.edit(nick=nickname)
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+  @app_commands.command(name = 'move', description='Memindahkan user ke channel lain')
+  @app_commands.checks.has_permissions(manage_nicknames=True)
+  @app_commands.describe(user='User yang ingin dipindahkan', channel='Nama user yang ingin dipindahkan')
+  async def move(self, interaction: discord.Interaction, user: discord.Member, channel: discord.TextChannel):
+    embed = discord.Embed(description=f'Memindahkan user dari {interaction.channel.mention} -> {channel.mention}')
+    await user.move_to(channel=channel)
+    await interaction.response.send_message(embed=embed)
+
+
+
       
     
     
@@ -141,6 +159,8 @@ class Admin(commands.Cog):
       return await interaction.response.send_message('Tidak ada akses.', ephemeral=True)
     elif isinstance(error, app_commands.TransformerError):
        return await interaction.response.send_message('User tidak ditemukan', ephemeral=True)
+
+
       
     
     
