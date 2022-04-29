@@ -26,7 +26,7 @@ class Bot(commands.Bot):
       return await super().close()
     
   async def on_ready(self):
-    print(f'Bot is online')
+    print(f'Bot is online!')
     
 bot = Bot()
 
