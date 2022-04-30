@@ -36,7 +36,7 @@ class EventListener(commands.Cog):
     with BytesIO() as a:
       background_img.save(a, 'PNG')
       a.seek(0)
-      await welcome_channel.send(file=discord.File(a, f'welcome_{member.name}.png'))
+      await welcome_channel.send(content=f'Selamat datang {member.mention} di server {member.guild.name}',file=discord.File(a, f'welcome_{member.name}.png'))
 
   @commands.Cog.listener(name='on_member_remove')
   async def on_member_remove(self, member: discord.Member):
