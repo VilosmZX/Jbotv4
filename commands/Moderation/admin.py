@@ -1,11 +1,13 @@
 from datetime import datetime
 import os
+from shutil import move
 from typing import Optional 
 import dotenv
 import discord 
 from discord.ext import commands 
 from discord import app_commands
 from commands.utils import generate_time
+from commands.utils import check_warn_collection
 
 dotenv.load_dotenv()
 
@@ -37,7 +39,6 @@ class Admin(commands.Cog):
   @app_commands.command(name='kick', description='Kick user dari server')
   @app_commands.checks.has_permissions(kick_members=True)
   async def kick(self, interaction: discord.Interaction, user: discord.Member, reason: Optional[str] = 'Tanpa Alasan'):
-    
     if user.guild_permissions.administrator:
       return await interaction.response.send_message('Kamu gak bisa kick seorang administrator.', ephemeral=True)
     view = self.Confirm(user)
@@ -126,8 +127,8 @@ class Admin(commands.Cog):
   async def clear(self, interaction: discord.Interaction, channel: Optional[discord.TextChannel] = None):
     if channel is None:
       channel: discord.TextChannel = interaction.channel
-    await channel.delete()
-    await interaction.response.send_message(f'semua pesna berhasil dihapus', ephemeral=True)
+    await channel.purge()
+    await interaction.response.send_message(f'semua pesan berhasil dihapus', ephemeral=True)
 
   @app_commands.command(name = 'setnickname', description='Mengubah nickname dari user')
   @app_commands.checks.has_permissions(manage_nicknames=True)
@@ -147,11 +148,68 @@ class Admin(commands.Cog):
       return await interaction.response.send_message(embed=embed)
     await user.move_to(channel=voice_channel)
     await interaction.response.send_message(embed=embed)
+    
+  @app_commands.command(name = 'warn', description='Warn user')
+  @app_commands.checks.has_permissions(ban_members=True)
+  @app_commands.describe(user = 'User yang in di warn')
+  async def warn(self, interaction: discord.Interaction, user: discord.Member):
+    await check_warn_collection(self.bot, user.id)
+    if user.guild_permissions.administrator:
+      return await interaction.response.send_message(f'{user.mention} adalah seorang administrator')
+    warn_data = await self.bot.warns.find_one({'_id': user.id})
+    embed = discord.Embed(color = discord.Color.random())
+    embed.description = f'{user.mention} telah di warn!'
+    warn_data['total_warn'] += 1
+    if warn_data['total_warn'] == 3:
+      warn_data['total_warn'] = 0
+      warn_data['total_kicked'] += 1
+      if warn_data['total_kicked'] == 3:
+        embed.description = f'Total di kick yang di miliki {user} udah 3, auto ban'
+        await user.ban(reason='Total di kick udah 3, auto ban')
+        return await interaction.response.send_message(embed=embed)
+      await self.bot.warns.replace_one({'_id': user.id}, warn_data)
+      embed.description = f'{user} telah di kick secara otomatis karena mempunya 3 warn.'
+      await user.kick(reason='Warn udah 3, auto kick')
+      return await interaction.response.send_message(embed=embed)
+    embed.set_footer(text=f'{3-warn_data["total_warn"]} warn lagi sebelum auto kick. ')
+    await self.bot.warns.replace_one({'_id': user.id}, warn_data)
+    await interaction.response.send_message(embed=embed)
+    
+  @app_commands.command(name = 'clearwarn', description='Clear semua warning')
+  @app_commands.describe(user = 'clear warn dari spesifik user')
+  @app_commands.checks.has_permissions(ban_members=True)
+  async def clearwarn(self, interaction: discord.Interaction, user: Optional[discord.Member] = None):
+    await check_warn_collection(self.bot, user.id)
+    await interaction.response.defer()
+    embed = discord.Embed(color = discord.Color.random())
+    if user.guild_permissions.administrator:
+      return await interaction.response.send_message(f'{user.mention} adalah seorang administrator')
+    if user is None:
+      total_warn = 0
+      all_user_warn = await self.bot.warns.find()
+      async for user_warn in all_user_warn.to_list():
+        if user_warn['total_warn'] > 0:
+          user_warn['total_warn'] = 0
+          await self.bot.warns.replace_one({'_id': user_warn['_id']}, user_warn)
+          total_warn += 1
+      embed.description = f'{total_warn} user telah di clear semua warn nya.'
+      return await interaction.followup.send(embed=embed)
+    warn_data = self.bot.warns.find_one({'_id': user.id})
+    old_total_warn = warn_data['total_warn']
+    warn_data['total_warn'] = 0
+    embed.description = f'{old_total_warn} warn telah di clear dari {user.mention}.'
+    await self.bot.warns.replace_one({'_id': user.id}, warn_data)
+    await interaction.followup.send(embed=embed)
 
       
   @kick.error 
   @ban.error
   @clearbans.error
+  @moveto.error
+  @setnickname.error
+  @clear.error
+  @warn.error
+  @clearwarn.error
   async def on_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.MissingPermissions):
       return await interaction.response.send_message('Tidak ada akses.', ephemeral=True)
