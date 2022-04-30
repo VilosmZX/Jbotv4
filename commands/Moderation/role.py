@@ -7,7 +7,7 @@ from discord import app_commands
 
 dotenv.load_dotenv()
 
-class Lock(commands.Cog, app_commands.Group, name = 'lock'):
+class Role(commands.Cog, app_commands.Group, name = 'role'):
   def __init__(self, bot: commands.Bot):
     self.bot = bot 
     super().__init__()
@@ -15,15 +15,16 @@ class Lock(commands.Cog, app_commands.Group, name = 'lock'):
   @app_commands.command(name = 'give', description='Memberikan role kepada user')
   @app_commands.checks.has_permissions(manage_roles=True)
   async def give_role(self, interaction: discord.Interaction, user: discord.Member, role: discord.Role):
+    await interaction.response.defer()
     embed = discord.Embed(color = discord.Color.random())
     if user.guild_permissions.administrator:
       return await interaction.response.send_message(f'{user} adalah seorang administrator')
-    if user.get_role(role.id) == None:
+    if user.get_role(role.id) != None:
       embed.description = f'{user.mention} sudah memiliki role {role}'
-      return await interaction.response.send_message(embed=embed)
+      return await interaction.followup.send(embed=embed)
     embed.description = f'Memberikan role {role} kepada {user}'
-    await user.add_roles([role])
-    await interaction.response.send_message(embed=embed)
+    await user.add_roles(role)
+    await interaction.followup.send(embed=embed)
       
       
   @app_commands.command(name = 'remove', description='Mengambil role dari user')
@@ -36,7 +37,7 @@ class Lock(commands.Cog, app_commands.Group, name = 'lock'):
       embed.description = f'{user.mention} tidak memiliki role {role}'
       return await interaction.response.send_message(embed=embed)
     embed.description = f'Mengambil role {role} dari {user.mention}'
-    await user.remove_roles([role])
+    await user.remove_roles(role)
     await interaction.response.send_message(embed=embed)
     
   @app_commands.command(name = 'clear', description='Mengambil semua role dari user')
@@ -48,7 +49,7 @@ class Lock(commands.Cog, app_commands.Group, name = 'lock'):
     if len(user.roles) == 0:
       return await interaction.response.send_message(f'{user} tidak memiliki role apapun')
     embed.description = f'Mengambil {len(user.roles)} role dari {user.mention}'
-    await user.remove_roles(user.roles)
+    await user.remove_roles(*user.roles)
     await interaction.response.send_message(embed=embed)
     
   @give_role.error 
@@ -61,5 +62,5 @@ class Lock(commands.Cog, app_commands.Group, name = 'lock'):
   
 
 async def setup(bot: commands.Bot):
-  await bot.add_cog(Lock(bot), guilds=[discord.Object(id=os.environ.get('GUID'))])
+  await bot.add_cog(Role(bot), guilds=[discord.Object(id=os.environ.get('GUID'))])
   
