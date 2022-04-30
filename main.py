@@ -34,6 +34,7 @@ async def main():
   bot.mongo = motor.AsyncIOMotorClient(os.environ.get('SRV'))
   bot.db = bot.mongo['jbot']
   bot.collection = bot.db['economy']
+  bot.warns = bot.db['warn']
   await bot.start(os.environ.get('TOKEN'))
   
 
