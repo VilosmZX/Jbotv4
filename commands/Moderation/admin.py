@@ -12,7 +12,7 @@ dotenv.load_dotenv()
 class Admin(commands.Cog):
   def __init__(self, bot: commands.Bot):
     self.bot = bot 
-    self.exception_channel = [969590898260312064]
+    self.exception_channel = [969590898260312064, 969786263957807104]
     
   class Confirm(discord.ui.View):
     def __init__(self, user: discord.Member):

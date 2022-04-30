@@ -11,7 +11,7 @@ class Lock(commands.Cog, app_commands.Group, name = 'lock'):
   def __init__(self, bot: commands.Bot):
     self.bot = bot 
     super().__init__()
-    self.exception_channel = [969590898260312064]
+    self.exception_channel = [969590898260312064, 969786263957807104]
     
     
  
