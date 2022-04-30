@@ -24,7 +24,7 @@ class Information(commands.Cog, app_commands.Group, name='info'):
     return pfp
 
 
-  @app_commands.command(name = 'user', description='Melihat a tentang user')
+  @app_commands.command(name = 'user', description='Melihat info tentang user')
   async def userinfo(self, interaction: discord.Interaction, user: Optional[discord.Member] = None):
     if user is None:
       user  = interaction.user
@@ -52,21 +52,6 @@ class Information(commands.Cog, app_commands.Group, name='info'):
       base_img.save(a, 'PNG')
       a.seek(0)
       await interaction.followup.send(file=discord.File(a, f'{username}.png'))
-
-
-
-
-
-
-
-
-
-
-
     
-
-    
-  
-  
 async def setup(bot: commands.Bot):
   await bot.add_cog(Information(bot), guilds=[discord.Object(id=os.environ.get('GUID'))])  
