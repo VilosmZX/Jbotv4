@@ -39,19 +39,25 @@ class Role(commands.Cog, app_commands.Group, name = 'role'):
     embed.description = f'Mengambil role {role} dari {user.mention}'
     await user.remove_roles(role)
     await interaction.response.send_message(embed=embed)
-    
-  @app_commands.command(name = 'clear', description='Mengambil semua role dari user')
-  @app_commands.checks.has_permissions(manage_roles=True)
-  async def clear_roles(self, interaction: discord.Interaction, user: discord.Member):
-    embed = discord.Embed(color = discord.Color.random())
-    if user.guild_permissions.administrator:
-      return await interaction.response.send_message(f'{user} adalah seorang administrator')
-    if len(user.roles) == 0:
-      return await interaction.response.send_message(f'{user} tidak memiliki role apapun')
-    embed.description = f'Mengambil {len(user.roles)} role dari {user.mention}'
-    await user.remove_roles(*user.roles)
-    await interaction.response.send_message(embed=embed)
-    
+  
+  
+  @app_commands.command(name = 'new', description='Add new role')
+  @app_commands.checks.has_permissions(manage_roles = True)
+  @app_commands.choices(
+    mentionable = [
+      app_commands.Choice(name = 'yes', value=1),
+      app_commands.Choice(name = 'no', value=2),
+    ],
+  )
+  @app_commands.describe(name = 'Nama role', display_icon = 'Icon dari role Harus serve boost', mentionable='bisa dimention orang atau ga, Default nya True')
+  async def new_role(self, interaction: discord.Interaction, name: str, display_icon: str = None, mentionable: int = True):
+    if mentionable == 1:
+      mentionable = True 
+    elif mentionable == 2:
+      mentionable = False 
+      
+    role = await interaction.channel.guild.create_role(name = name, permissions=discord.Permissions.general(), color=discord.Color.random(), display_icon=display_icon, mentionable=mentionable)
+    await interaction.response.send_message(f'Berhasil menambahkan role {role.mention}')
   @give_role.error 
   async def on_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
       if isinstance(error, app_commands.MissingPermissions):
