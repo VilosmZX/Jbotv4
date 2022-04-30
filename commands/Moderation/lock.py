@@ -11,6 +11,7 @@ class Lock(commands.Cog, app_commands.Group, name = 'lock'):
   def __init__(self, bot: commands.Bot):
     self.bot = bot 
     super().__init__()
+    self.exception_channel = [969590898260312064]
     
     
  
@@ -21,6 +22,8 @@ class Lock(commands.Cog, app_commands.Group, name = 'lock'):
     if channel is None:
       channel = interaction.channel
     if not channel.permissions_for(everyone_role).send_messages:
+      if channel.id in self.exception_channel:
+        return await interaction.response.send_message(f'Channel tidak bisa di buka')
       await channel.set_permissions(everyone_role, send_messages=True)
       return await interaction.response.send_message(f'🔓 Channel {channel.mention} berhasil di buka.')
     await channel.set_permissions(everyone_role, send_messages=False)

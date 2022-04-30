@@ -12,6 +12,7 @@ dotenv.load_dotenv()
 class Admin(commands.Cog):
   def __init__(self, bot: commands.Bot):
     self.bot = bot 
+    self.exception_channel = [969590898260312064]
     
   class Confirm(discord.ui.View):
     def __init__(self, user: discord.Member):
@@ -108,10 +109,10 @@ class Admin(commands.Cog):
       else:
         perm = True 
         status = 'unlock'
-      if c.type == discord.ChannelType.text:
+      if c.type == discord.ChannelType.text and c.id not in self.exception_channel:
         await c.set_permissions(everyone_role, send_messages=perm)
         total_text_channel += 1
-      elif c.type == discord.ChannelType.voice:
+      elif c.type == discord.ChannelType.voice and c.id not in self.exception_channel:
         await c.set_permissions(everyone_role, connect=perm)
         total_voice_channel += 1
     embed = discord.Embed(title='⚠ Lockdown')
