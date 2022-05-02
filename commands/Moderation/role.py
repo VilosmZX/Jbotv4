@@ -58,7 +58,21 @@ class Role(commands.Cog, app_commands.Group, name = 'role'):
       
     role = await interaction.channel.guild.create_role(name = name, permissions=discord.Permissions.general(), color=discord.Color.random(), display_icon=display_icon, mentionable=mentionable)
     await interaction.response.send_message(f'Berhasil menambahkan role {role.mention}')
-  @give_role.error 
+
+  @app_commands.command(name = 'delete', description='Delete role dari server')
+  @app_commands.checks.has_permissions(manage_roles=True)
+  async def delete_role(self, interaction: discord.Interaction, role: discord.Role):
+    await interaction.response.defer()
+    embed = discord.Embed(color = discord.Color.random())
+    embed.description = f'Role {role.mention} berhasil di delete'
+    await interaction.followup.send(embed=embed)
+    await interaction.guild.get_role(role.id).delete()
+
+
+
+  @give_role.error
+  @remove_role.error
+  @new_role.error
   async def on_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
       if isinstance(error, app_commands.MissingPermissions):
         return await interaction.response.send_message('Tidak ada akses', ephemeral=True)
