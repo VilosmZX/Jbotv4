@@ -8,6 +8,8 @@ from discord.ext import commands
 from discord import app_commands
 from commands.utils import generate_time
 from commands.utils import check_warn_collection
+import random
+from asyncio.exceptions import TimeoutError
 
 dotenv.load_dotenv()
 
@@ -201,7 +203,7 @@ class Admin(commands.Cog):
     await self.bot.warns.replace_one({'_id': user.id}, warn_data)
     await interaction.followup.send(embed=embed)
 
-      
+
   @kick.error 
   @ban.error
   @clearbans.error

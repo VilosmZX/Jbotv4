@@ -34,6 +34,30 @@ class General(commands.Cog):
     return await interaction.response.send_message(embed=embed)
 
 
+  @app_commands.command(name = 'avatar', description='Mendapatkan gambar dari avatar mu')
+  async def avatar(self, interaction: discord.Interaction, user: Optional[discord.Member] = None):
+    if user is None:
+      user = interaction.user
+    avatar = Image.open(BytesIO(await user.display_avatar.with_size(256).read()))
+    with BytesIO() as a:
+      avatar.save(a, 'PNG')
+      a.seek(0)
+      await interaction.response.send_message(file=discord.File(a, f'avatar_{user.id}.png'))
+
+  @app_commands.command(name = 'report', description='Report user')
+  async def report(self, interaction: discord.Interaction, user: discord.Member, reason: str):
+    report_channel = await interaction.guild.fetch_channel(970293995018276965)
+    embed = discord.Embed(description=f'Report dari {interaction.user.mention}\nSuspect: {user.mention}\n\nAlasan Lebih Lengkap:\n{reason}')
+    embed.set_footer(text=f'Report masuk jam {generate_time()}')
+    await interaction.response.send_message(f'Report telah di record, admin akan segera memeriksa nya.', ephemeral=True)
+    await report_channel.send(embed=embed)
+
+
+
+
+
+
+
 
 
 
