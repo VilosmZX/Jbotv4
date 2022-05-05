@@ -13,14 +13,6 @@ class Shop(commands.Cog, app_commands.Group, name='shop'):
   def __init__(self, bot: commands.Bot):
     self.bot = bot 
     super().__init__()
-  
-  @app_commands.command(name='buy', description='Membeli barang')
-  async def buy(self, interaction: discord.Interaction):
-    pass 
-  
-  @app_commands.command(name='sell', description='Menjual barang yang kamu punya')
-  async def sell(self, interaction: discord.Interaction):
-    pass
     
      
     
