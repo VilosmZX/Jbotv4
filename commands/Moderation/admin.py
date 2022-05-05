@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime
 import os
 from shutil import move
@@ -10,7 +11,7 @@ from commands.utils import generate_time
 from commands.utils import check_warn_collection
 import random
 from asyncio.exceptions import TimeoutError
-
+from datetime import datetime
 dotenv.load_dotenv()
 
 class Admin(commands.Cog):
@@ -203,6 +204,34 @@ class Admin(commands.Cog):
     await self.bot.warns.replace_one({'_id': user.id}, warn_data)
     await interaction.followup.send(embed=embed)
 
+  @app_commands.command(name = 'tempban', description='Temp ban user')
+  @app_commands.checks.has_permissions(ban_members=True)
+  async def tempban(self, interaction: discord.Interaction, user: discord.Member,seconds: Optional[int] = 0, minutes: Optional[int] = 0, hours: Optional[int] = 0, days: Optional[int] = 0):
+    await interaction.response.defer()
+    await interaction.followup.send('...')
+    report_channel = await interaction.guild.fetch_channel(970293995018276965)
+    userName = user
+    userID = user.id
+    currentTime = datetime.now()
+    minutesInSeconds = minutes * 60
+    hoursInSeconds = hours * 60 * 60
+    daysInSeconds = days * 24 * 60 * 60
+    waitTime = minutesInSeconds + hoursInSeconds + daysInSeconds + seconds
+    endedTime = datetime.fromtimestamp(currentTime + waitTime).strftime(r'%d/%m/%y')
+    embed = discord.Embed(color = discord.Color.random())
+    embed.description = f'{user.mention} telah di ban.'
+    embed.set_footer(text=f'Ban berakhir pada {endedTime}')
+    await interaction.followup.send(embed=embed)
+    await user.ban()
+    await asyncio.sleep(waitTime)
+    bannedUser = await interaction.client.fetch_user(userID)
+    await interaction.guild.unban(bannedUser)
+    embed.description = f'User {userName} telah di unban secara otomatis.'
+    embed.set_footer(text=None)
+    await report_channel.send(embed)
+    embed.description = f'Halo {bannedUser.mention}, kamu telah di unban secara otomatis di server {interaction.guild.name}'
+    embed.set_author(name=interaction.guild.name, url=(await interaction.guild.invites())[0], icon_url=interaction.guild.icon.url)
+    await bannedUser.send(embed=embed)
 
   @kick.error 
   @ban.error
@@ -212,6 +241,7 @@ class Admin(commands.Cog):
   @clear.error
   @warn.error
   @clearwarn.error
+  @tempban.error
   async def on_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.MissingPermissions):
       return await interaction.response.send_message('Tidak ada akses.', ephemeral=True)
