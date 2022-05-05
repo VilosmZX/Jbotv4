@@ -64,7 +64,7 @@ class Role(commands.Cog, app_commands.Group, name = 'role'):
   async def delete_role(self, interaction: discord.Interaction, role: discord.Role):
     await interaction.response.defer()
     embed = discord.Embed(color = discord.Color.random())
-    embed.description = f'Role {role.mention} berhasil di delete'
+    embed.description = f'Role {role} berhasil di delete'
     await interaction.followup.send(embed=embed)
     await interaction.guild.get_role(role.id).delete()
 
