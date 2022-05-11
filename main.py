@@ -6,6 +6,7 @@ from discord.ext import commands
 import dotenv
 import motor.motor_asyncio as motor
 from website import run
+import wavelink
 
 dotenv.load_dotenv()
 
@@ -16,18 +17,24 @@ class Bot(commands.Bot):
       intents=discord.Intents.all(),
       application_id=int(os.environ.get('APPID'))
     )
-    
+
+  async def node_connect(self):
+    await bot.wait_until_ready()
+    await wavelink.NodePool.create_node(bot=bot, host='lavalinkinc.ml', port=443, password='incognito', https=True)
+
   async def setup_hook(self) -> None:
       await load_all(bot)
       # Remove this to set The command globally
       await bot.tree.sync(guild=discord.Object(id=int(os.environ.get('GUID'))))
+
       
   async def close(self) -> None:
       return await super().close()
     
   async def on_ready(self):
     print(f'Bot is online!')
-    
+    await self.loop.create_task(self.node_connect())
+
 bot = Bot()
 
 async def main():
