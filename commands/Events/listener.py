@@ -10,6 +10,7 @@ from discord import app_commands
 from commands.utils.timestamp import generate_time
 from commands.utils import to_circle
 from io import BytesIO
+import wavelink
 
 dotenv.load_dotenv()
 class EventListener(commands.Cog):
@@ -56,6 +57,14 @@ class EventListener(commands.Cog):
       background_img.save(a, 'PNG')
       a.seek(0)
       await welcome_channel.send(file=discord.File(a, f'welcome_{member.name}.png'))
+
+
+
+  @commands.Cog.listener(name='on_wavelink_node_ready')
+  async def on_node_ready(self, node: wavelink.Node):
+    print(f'Node {node.identifier} is ready!')
+
+
 
 async def setup(bot: commands.Bot):
   await bot.add_cog(EventListener(bot), guilds=[discord.Object(id=os.environ.get('GUID'))])
