@@ -42,6 +42,7 @@ class Economy(commands.Cog):
     embed.set_footer(text=f'Hari ini jam {timestamp}')
     await check_user(self.bot, interaction.user.id)
     money_received = 50000
+
     user_data = await self.bot.collection.find_one({'_id': interaction.user.id})
     user_data['money'] += money_received
     await self.bot.collection.replace_one({'_id': interaction.user.id}, user_data)
@@ -93,9 +94,8 @@ class Economy(commands.Cog):
     await interaction.response.send_message(embed=embed)
 
 
-    
-  
-    
+
+
   @beg.error 
   @claim.error
   @rob.error
