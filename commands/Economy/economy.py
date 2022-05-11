@@ -47,12 +47,58 @@ class Economy(commands.Cog):
     await self.bot.collection.replace_one({'_id': interaction.user.id}, user_data)
     await interaction.response.send_message(embed=embed)
 
-  
+  @app_commands.command(name = 'rob', description='Maling uang orang')
+  @app_commands.checks.cooldown(rate = 1, per=60*5)
+  async def rob(self, interaction: discord.Interaction, user: discord.Member):
+    await check_user(self.bot, user.id)
+    await check_user(self.bot, interaction.user.id)
+    percentage = random.random()
+    embed = discord.Embed(color = discord.Color.random())
+    user_data = await self.bot.collection.find_one({'_id': user.id})
+    author_data = await self.bot.collection.find_one({'_id': interaction.user.id})  
+    money_received = int(user_data['money'] * 0.5)
+    if not user_data['money'] > 10000 or not author_data['money'] > 10000:
+      embed.description = f'Uang mu atau uang target terlalu sedikit. Minimal Rp10.000'
+      return await interaction.response.send_message(embed=embed)
+    if percentage > 0.7:
+      user_data['money'] -= money_received
+      author_data['money'] += money_received
+      await self.bot.collection.replace_one({'_id': user.id}, user_data)
+      await self.bot.collection.replace_one({'_id': interaction.user.id}, author_data)
+      embed.description = f'Berhasil merampok uang Rp{money_received} dari {user.mention}'
+      return await interaction.response.send_message(embed=embed)
+    author_data['money'] -= money_received
+    await self.bot.collection.replace_one({'_id': interaction.user.id}, author_data)
+    embed.description = f'Kamu ketauan lalu digebuk dan dibawa ke kantor polisi. Denda Rp{money_received}.'
+    await interaction.response.send_message(embed=embed)
+
+  @app_commands.command(name = 'donate', description='Ngasih uang saku ke orang')
+  async def donate(self, interaction: discord.Interaction, user: discord.Member, money: int):
+    await check_user(self.bot, user.id)
+    await check_user(self.bot, interaction.user.id)
+    embed = discord.Embed(color = discord.Color.random())
+    user_data = await self.bot.collection.find_one({'_id': user.id})
+    author_data = await self.bot.collection.find_one({'_id': interaction.user.id})  
+    if money < 100:
+      embed.description = f'Minimal 100 perak'
+      return await interaction.response.send_message(embed=embed)
+    if not author_data['money'] > money:
+      embed.description = f'Uang mu kurang dari Rp{money}'
+      return await interaction.response.send_message(embed=embed)
+    user_data['money'] += money 
+    author_data['money'] -= money 
+    await self.bot.collection.replace_one({'_id': user.id}, user_data)
+    await self.bot.collection.replace_one({'_id': interaction.user.id}, author_data)
+    embed.description = f'Berhasil memberi {user.mention} uang sejumlah Rp{money}'
+    await interaction.response.send_message(embed=embed)
+
+
     
   
     
   @beg.error 
   @claim.error
+  @rob.error
   async def on_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
     if isinstance(error, app_commands.CommandOnCooldown):
       await interaction.response.defer(ephemeral=True)
